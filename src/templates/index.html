@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Scan</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        p {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .file-upload {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        label {
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        label:hover {
+            background-color: #45a049;
+        }
+
+        button {
+            background-color: #008CBA;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #005f6b;
+        }
+
+        #file-name {
+            display: block;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        #results {
+            text-align: center;
+            margin-top: 20px;
+            color: #FF6347;
+        }
+
+        #loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Secure Scan</h1>
+        <p>Protect your data by identifying sensitive information in your files.</p>
+        <form id="upload-form">
+            <div class="file-upload">
+                <input type="file" id="file-input" name="file">
+                <label for="file-input">Select File</label>
+                <span id="file-name"></span>
+            </div>
+            <button style="display: block; margin: auto;" type="submit">Scan File</button>
+        </form>
+        <div id="loading">Scanning in progress, please wait...</div>
+        <div id="results"></div>
+    </div>
+    <script>
+        const form = document.getElementById('upload-form');
+        const fileInput = document.getElementById('file-input');
+        const fileName = document.getElementById('file-name');
+        const resultsDiv = document.getElementById('results');
+        const loadingDiv = document.getElementById('loading');
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                fileName.textContent = fileInput.files[0].name;
+            } else {
+                fileName.textContent = '';
+            }
+        });
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const file = fileInput.files[0];
+            if (!file) {
+                alert("Please select a file to upload");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            loadingDiv.style.display = 'block'; // Show loading message
+            resultsDiv.textContent = ''; // Clear previous results
+
+            try {
+                const response = await fetch('/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.text(); // Assume the server returns JSON
+                displayResults(data);
+            } catch (error) {
+                console.error(error);
+                resultsDiv.textContent = "An error occurred during the scan.";
+            } finally {
+                loadingDiv.style.display = 'none'; // Hide loading message
+            }
+        });
+
+        function displayResults(data) {
+            resultsDiv.innerHTML = "";
+            const resultMessage = document.createElement('p');
+            resultMessage.textContent = data;
+            resultMessage.style.color = "#008CBA" ;
+            resultsDiv.appendChild(resultMessage);
+
+            const detailsList = document.createElement('ul');
+            const listItem = document.createElement('li');
+            listItem.textContent = data.details;
+            detailsList.appendChild(listItem);
+            resultsDiv.appendChild(detailsList);
+        }
+    </script>
+
+</body>
+
+</html>
